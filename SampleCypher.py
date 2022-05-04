@@ -111,7 +111,7 @@ def addRoundKey(pt,rk):
             pt[j][i] = z
     return pt
 
-def substitute(pt,s_box):
+def substituteBytes(pt,s_box):
     for i in range(4):
         for j in range(4):
             u = hex(s_box[int(pt[i][j][2],16)][int(pt[i][j][3],16)])
@@ -122,7 +122,7 @@ def substitute(pt,s_box):
             pt[i][j] = u
     return pt
 
-def shiftRow(pt):
+def shiftRowBytes(pt):
     pt[0][1],pt[1][1],pt[2][1],pt[3][1] = pt[1][1],pt[2][1],pt[3][1],pt[0][1]
     pt[0][2],pt[1][2],pt[2][2],pt[3][2] = pt[2][2],pt[3][2],pt[0][2],pt[1][2]
     pt[0][3],pt[1][3],pt[2][3],pt[3][3] = pt[3][3],pt[0][3],pt[1][3],pt[2][3]
@@ -230,7 +230,7 @@ s_box = [
 ]
 rci = ["0x01","0x02","0x04","0x08","0x10","0x20","0x40","0x80","0x1B","0x36"]
 mul2 = [
-    [0x00,0x02,0x04,0x06,0x08,0x0a,0x0c,0x0e,0x10,0x12,0x14,0x16,0x18,0x1a,0x1c,0x1e],
+[0x00,0x02,0x04,0x06,0x08,0x0a,0x0c,0x0e,0x10,0x12,0x14,0x16,0x18,0x1a,0x1c,0x1e],
 [0x20,0x22,0x24,0x26,0x28,0x2a,0x2c,0x2e,0x30,0x32,0x34,0x36,0x38,0x3a,0x3c,0x3e],
 [0x40,0x42,0x44,0x46,0x48,0x4a,0x4c,0x4e,0x50,0x52,0x54,0x56,0x58,0x5a,0x5c,0x5e],
 [0x60,0x62,0x64,0x66,0x68,0x6a,0x6c,0x6e,0x70,0x72,0x74,0x76,0x78,0x7a,0x7c,0x7e],
@@ -290,26 +290,23 @@ print("---------Round 0---------")
 print("After round 0 add key")
 initialState = addRoundKey(initialState,initialKey)
 printMatrix(initialState)
-for i in range(1,11):
-    print("--------Round "+str(i)+"---------")
-    initialKey = keyExpansion(initialKey,i,rci,s_box)
-    print("This round Key")
-    printMatrix(initialKey)
-    print("After Susbstitution")
-    initialState = substitute(initialState,s_box)
-    printMatrix(initialState)
+print("--------Round "+str(i)+"---------")
+initialKey = keyExpansion(initialKey,i,rci,s_box)
+print("This round Key")
+printMatrix(initialKey)
+print("After Susbstitution")
+initialState = substituteBytes(initialState,s_box)
+printMatrix(initialState)
+print("After shift rows")
+initialState = shiftRowBytes(initialState)
+printMatrix(initialState)
+print("After Mix column")
+initialState = mixCol(mul2,mul3,initialState)
+printMatrix(initialState)
 
-    print("After shift rows")
-    initialState = shiftRow(initialState)
-    printMatrix(initialState)
-    if(i!=10):
-        print("After Mix column")
-        initialState = mixCol(mul2,mul3,initialState)
-        printMatrix(initialState)
-
-    print("After add round key")
-    initialState = addRoundKey(initialState,initialKey)
-    printMatrix(initialState)
+print("After add round key")
+initialState = addRoundKey(initialState,initialKey)
+printMatrix(initialState)
 print("-----------Result----------")
 print("Original Message")
 printCipher(finalState)

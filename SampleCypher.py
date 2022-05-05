@@ -1,33 +1,33 @@
-def keyExpansion(key,numround,rci,s_box):
-    round_const = rci[numround-1]
-    gw3 = [key[3][1],key[3][2],key[3][3],key[3][0]]
+def GetRoundKeys(key,rounds,rci,s_box):
+    const = rci[rounds-1]
+    rev_key = [key[3][1],key[3][2],key[3][3],key[3][0]]
     for i in range(4):
-        u = hex(s_box[int(gw3[i][2],16)][int(gw3[i][3],16)])
+        u = hex(s_box[int(rev_key[i][2],16)][int(rev_key[i][3],16)])
         if(u == "0x0"):
             u = "0x00"
         elif(len(u.lstrip("0x"))<=1):
             u = "0x0"+u.lstrip("0x")
-        gw3[i] = u
+        rev_key[i] = u
     a = 1
     b = 1
-    if(gw3[0] == "0x00" or gw3[0] == "0x0"):
+    if(rev_key[0] == "0x00" or rev_key[0] == "0x0"):
         a = 0
     else:
-        a = int(gw3[0].lstrip("0x"),16)
-    x = hex(int(a^int(round_const.lstrip("0x"),16)))
+        a = int(rev_key[0].lstrip("0x"),16)
+    x = hex(int(a^int(const.lstrip("0x"),16)))
     if(x == "0x0"):
         x = "0x00"
     elif(len(x.lstrip("0x"))<=1):
         x = "0x0"+x.lstrip("0x")
-    gw3[0] = x
+    rev_key[0] = x
     w4 = []
     for i in range(4):
         r = 1
         p = 1
-        if(gw3[i] == "0x00" or gw3[i] == "0x0"):
+        if(rev_key[i] == "0x00" or rev_key[i] == "0x0"):
             r = 0
         else:
-            r = int(gw3[i].lstrip("0x"),16)
+            r = int(rev_key[i].lstrip("0x"),16)
         if(key[0][i] == "0x00" or key[0][i] == "0x0"):
             p = 0
         else:
@@ -111,22 +111,22 @@ def addRoundKey(pt,rk):
             pt[j][i] = z
     return pt
 
-def substituteBytes(pt,s_box):
+def substituteBytes(xxt,s_box):
     for i in range(4):
         for j in range(4):
-            u = hex(s_box[int(pt[i][j][2],16)][int(pt[i][j][3],16)])
+            u = hex(s_box[int(xxt[i][j][2],16)][int(xxt[i][j][3],16)])
             if(u == "0x0"):
                 u = "0x00"
             elif(len(u.lstrip("0x"))<=1):
                 u = "0x0"+u.lstrip("0x")
-            pt[i][j] = u
-    return pt
+            xxt[i][j] = u
+    return xxt
 
-def shiftRowBytes(pt):
-    pt[0][1],pt[1][1],pt[2][1],pt[3][1] = pt[1][1],pt[2][1],pt[3][1],pt[0][1]
-    pt[0][2],pt[1][2],pt[2][2],pt[3][2] = pt[2][2],pt[3][2],pt[0][2],pt[1][2]
-    pt[0][3],pt[1][3],pt[2][3],pt[3][3] = pt[3][3],pt[0][3],pt[1][3],pt[2][3]
-    return pt
+def shiftRowBytes(fy):
+    fy[0][1],fy[1][1],fy[2][1],fy[3][1] = fy[1][1],fy[2][1],fy[3][1],fy[0][1]
+    fy[0][2],fy[1][2],fy[2][2],fy[3][2] = fy[2][2],fy[3][2],fy[0][2],fy[1][2]
+    fy[0][3],fy[1][3],fy[2][3],fy[3][3] = fy[3][3],fy[0][3],fy[1][3],fy[2][3]
+    return fy
 
 def mixMulCol(col,mul2,mul3):
     temp = []
@@ -174,16 +174,18 @@ def mixMulCol(col,mul2,mul3):
         m = "0x0"+m.lstrip("0x")
     temp.append(m)
     return temp
-def mixCol(mul2,mul3,pt):
+
+def mixCol(mul2,mul3,ttt):
     res = []
     for i in range(4):
         temp = []
-        temp.append(pt[i][0])
-        temp.append(pt[i][1])
-        temp.append(pt[i][2])
-        temp.append(pt[i][3])
+        temp.append(ttt[i][0])
+        temp.append(ttt[i][1])
+        temp.append(ttt[i][2])
+        temp.append(ttt[i][3])
         res.append(mixMulCol(temp,mul2,mul3))
     return res
+
 def printMatrix(m):
     for i in range(4):
         for j in range(4):
@@ -285,13 +287,9 @@ print("Initial Plain text Matrix")
 printMatrix(initialState)
 print("Initial Key matrix")
 printMatrix(initialKey)
-print("-------------------------")
-print("---------Round 0---------")
-print("After round 0 add key")
 initialState = addRoundKey(initialState,initialKey)
 printMatrix(initialState)
-print("--------Round "+str(i)+"---------")
-initialKey = keyExpansion(initialKey,i,rci,s_box)
+initialKey = GetRoundKeys(initialKey,i,rci,s_box)
 print("This round Key")
 printMatrix(initialKey)
 print("After Susbstitution")
@@ -303,14 +301,13 @@ printMatrix(initialState)
 print("After Mix column")
 initialState = mixCol(mul2,mul3,initialState)
 printMatrix(initialState)
-
 print("After add round key")
 initialState = addRoundKey(initialState,initialKey)
 printMatrix(initialState)
-print("-----------Result----------")
-print("Original Message")
+print("--Result-")
+print("Original Message: ")
 printCipher(finalState)
-print("The cipher text is")
+print("Cipher text: ")
 printCipher(initialState)
 
 

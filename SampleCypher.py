@@ -1,13 +1,13 @@
-def GetRoundKeys(key,rounds,rci,s_box):
-    const = rci[rounds-1]
+def GetRoundKeys(key,rounds,compute,s_box):
+    const = compute[rounds-1]
     rev_key = [key[3][1],key[3][2],key[3][3],key[3][0]]
     for i in range(4):
-        u = hex(s_box[int(rev_key[i][2],16)][int(rev_key[i][3],16)])
-        if(u == "0x0"):
-            u = "0x00"
-        elif(len(u.lstrip("0x"))<=1):
-            u = "0x0"+u.lstrip("0x")
-        rev_key[i] = u
+        w = hex(s_box[int(rev_key[i][2],16)][int(rev_key[i][3],16)])
+        if(w == "0x0"):
+            w = "0x00"
+        elif(len(w.lstrip("0x"))<=1):
+            w = "0x0"+w.lstrip("0x")
+        rev_key[i] = w
     a = 1
     b = 1
     if(rev_key[0] == "0x00" or rev_key[0] == "0x0"):
@@ -186,10 +186,10 @@ def mixCol(mul2,mul3,ttt):
         res.append(mixMulCol(temp,mul2,mul3))
     return res
 
-def printMatrix(m):
+def printMatrix(dex):
     for i in range(4):
         for j in range(4):
-            y = m[j][i]
+            y = dex[j][i]
             if(y == "0x00"):
                 y = "00"
             elif(len(y.lstrip("0x")) <= 1):
@@ -198,10 +198,11 @@ def printMatrix(m):
                 y = y.lstrip("0x")
             print(y.upper(),end=" ")
         print(" ")
-def printCipher(m):
+        
+def printCipher(mx):
     for i in range(4):
         for j in range(4):
-            y = m[i][j]
+            y = mx[i][j]
             if(y == "0x00"):
                 y = "00"
             elif(len(y.lstrip("0x")) <= 1):
@@ -230,7 +231,7 @@ s_box = [
     [0xE1, 0xF8, 0x98, 0x11, 0x69, 0xD9, 0x8E, 0x94, 0x9B, 0x1E, 0x87, 0xE9, 0xCE, 0x55, 0x28, 0xDF],
     [0x8C, 0xA1, 0x89, 0x0D, 0xBF, 0xE6, 0x42, 0x68, 0x41, 0x99, 0x2D, 0x0F, 0xB0, 0x54, 0xBB, 0x16]
 ]
-rci = ["0x01","0x02","0x04","0x08","0x10","0x20","0x40","0x80","0x1B","0x36"]
+compute = ["0x01","0x02","0x04","0x08","0x10","0x20","0x40","0x80","0x1B","0x36"]
 mul2 = [
 [0x00,0x02,0x04,0x06,0x08,0x0a,0x0c,0x0e,0x10,0x12,0x14,0x16,0x18,0x1a,0x1c,0x1e],
 [0x20,0x22,0x24,0x26,0x28,0x2a,0x2c,0x2e,0x30,0x32,0x34,0x36,0x38,0x3a,0x3c,0x3e],
@@ -289,7 +290,7 @@ print("Initial Key matrix")
 printMatrix(initialKey)
 initialState = addRoundKey(initialState,initialKey)
 printMatrix(initialState)
-initialKey = GetRoundKeys(initialKey,i,rci,s_box)
+initialKey = GetRoundKeys(initialKey,i,compute,s_box)
 print("This round Key")
 printMatrix(initialKey)
 print("After Susbstitution")
@@ -309,7 +310,3 @@ print("Original Message: ")
 printCipher(finalState)
 print("Cipher text: ")
 printCipher(initialState)
-
-
-
-        
